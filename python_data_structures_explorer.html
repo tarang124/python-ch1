@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Data Structures: Interactive Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #fafaf9;
+            color: #1c1917;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f5f5f4;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d6d3d1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a29e;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .active-nav {
+            background-color: #115e59;
+            color: #ffffff;
+        }
+        pre {
+            background-color: #292524;
+            color: #f5f5f4;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+        }
+        .code-highlight {
+            color: #34d399;
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen">
+
+<!-- Chosen Palette: Warm Neutrals (Stone) with subtle Teal and Amber accents to create a calm, focused learning environment. -->
+<!-- Application Structure Plan: A dashboard-style layout with a fixed sidebar navigation and dynamic main content area. This allows users to seamlessly switch between exploring core data structures, comparing their features, and visualizing their performance characteristics without losing context. The goal is to provide bite-sized, interactive learning modules suitable for exam preparation. -->
+<!-- Visualization & Content Choices: 1. Concept Explorer: Interactive cards -> Goal: Inform -> Justification: Breaks down dense text into digestible chunks. 2. Feature Matrix: Filterable table -> Goal: Compare -> Justification: Provides a side-by-side view exactly like the requested format. 3. Performance Chart: Chart.js Bar Chart -> Goal: Inform/Compare -> Justification: Visually contrasts the speed of Sets vs Lists to reinforce theoretical rules. 4. NO SVG/Mermaid used. Unicode icons and standard HTML/CSS structuring applied. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <nav class="w-full md:w-64 bg-stone-100 border-r border-stone-200 flex flex-col p-6 shadow-lg z-10 shrink-0">
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-teal-800 tracking-tight">PyData<br>Explorer</h1>
+            <p class="text-xs text-stone-500 mt-1 uppercase tracking-widest font-semibold">Exam Prep Dashboard</p>
+        </div>
+        <div class="flex flex-col space-y-2">
+            <button onclick="navigate('concepts')" id="btn-concepts" class="nav-btn active-nav text-left px-4 py-3 rounded-lg font-medium transition-colors hover:bg-teal-700 hover:text-white flex items-center gap-3">
+                <span class="text-xl">📚</span> Core Concepts
+            </button>
+            <button onclick="navigate('matrix')" id="btn-matrix" class="nav-btn text-stone-600 text-left px-4 py-3 rounded-lg font-medium transition-colors hover:bg-stone-200 flex items-center gap-3">
+                <span class="text-xl">🔲</span> Feature Matrix
+            </button>
+            <button onclick="navigate('performance')" id="btn-performance" class="nav-btn text-stone-600 text-left px-4 py-3 rounded-lg font-medium transition-colors hover:bg-stone-200 flex items-center gap-3">
+                <span class="text-xl">📊</span> Performance
+            </button>
+            <button onclick="navigate('comprehensions')" id="btn-comprehensions" class="nav-btn text-stone-600 text-left px-4 py-3 rounded-lg font-medium transition-colors hover:bg-stone-200 flex items-center gap-3">
+                <span class="text-xl">⚡</span> Comprehensions
+            </button>
+            <button onclick="navigate('methods')" id="btn-methods" class="nav-btn text-stone-600 text-left px-4 py-3 rounded-lg font-medium transition-colors hover:bg-stone-200 flex items-center gap-3">
+                <span class="text-xl">🛠️</span> Methods Reference
+            </button>
+        </div>
+    </nav>
+
+    <main class="flex-1 p-6 md:p-10 lg:p-12 overflow-y-auto w-full max-w-7xl mx-auto">
+
+        <section id="sec-concepts" class="block animate-fade-in">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-2">Core Data Structures</h2>
+                <p class="text-stone-600 text-lg leading-relaxed max-w-3xl">
+                    Welcome to the Core Concepts module. This section is designed to help you interactively explore the foundational characteristics of Python's built-in data sequences and mappings. Click through the data structure cards below to instantly reveal their specific rules, mutability states, index behaviors, and exact syntax examples necessary for your exam.
+                </p>
+            </header>
+
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                <button onclick="loadConcept('list')" class="p-4 rounded-xl bg-white shadow-sm border border-stone-200 hover:border-teal-500 hover:shadow-md transition-all flex flex-col items-center justify-center gap-2 group">
+                    <span class="text-3xl group-hover:scale-110 transition-transform">📦</span>
+                    <span class="font-semibold text-stone-700">List</span>
+                </button>
+                <button onclick="loadConcept('string')" class="p-4 rounded-xl bg-white shadow-sm border border-stone-200 hover:border-teal-500 hover:shadow-md transition-all flex flex-col items-center justify-center gap-2 group">
+                    <span class="text-3xl group-hover:scale-110 transition-transform">🔤</span>
+                    <span class="font-semibold text-stone-700">String</span>
+                </button>
+                <button onclick="loadConcept('tuple')" class="p-4 rounded-xl bg-white shadow-sm border border-stone-200 hover:border-teal-500 hover:shadow-md transition-all flex flex-col items-center justify-center gap-2 group">
+                    <span class="text-3xl group-hover:scale-110 transition-transform">🔒</span>
+                    <span class="font-semibold text-stone-700">Tuple</span>
+                </button>
+                <button onclick="loadConcept('set')" class="p-4 rounded-xl bg-white shadow-sm border border-stone-200 hover:border-teal-500 hover:shadow-md transition-all flex flex-col items-center justify-center gap-2 group">
+                    <span class="text-3xl group-hover:scale-110 transition-transform">🏷️</span>
+                    <span class="font-semibold text-stone-700">Set</span>
+                </button>
+                <button onclick="loadConcept('dict')" class="p-4 rounded-xl bg-white shadow-sm border border-stone-200 hover:border-teal-500 hover:shadow-md transition-all flex flex-col items-center justify-center gap-2 group">
+                    <span class="text-3xl group-hover:scale-110 transition-transform">🔑</span>
+                    <span class="font-semibold text-stone-700">Dictionary</span>
+                </button>
+            </div>
+
+            <div id="concept-display" class="glass-panel p-8 rounded-2xl shadow-sm hidden">
+                <div class="flex flex-col lg:flex-row gap-8">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span id="c-icon" class="text-4xl"></span>
+                            <h3 id="c-title" class="text-3xl font-bold text-stone-800 capitalize"></h3>
+                        </div>
+                        <p id="c-desc" class="text-stone-600 mb-6 text-lg"></p>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="bg-stone-50 p-4 rounded-lg border border-stone-100">
+                                <p class="text-xs text-stone-400 font-bold uppercase tracking-wider mb-1">Syntax</p>
+                                <p id="c-syntax" class="font-mono text-teal-700 font-bold text-lg"></p>
+                            </div>
+                            <div class="bg-stone-50 p-4 rounded-lg border border-stone-100">
+                                <p class="text-xs text-stone-400 font-bold uppercase tracking-wider mb-1">Mutability</p>
+                                <p id="c-mutable" class="font-semibold text-stone-800 text-lg"></p>
+                            </div>
+                            <div class="bg-stone-50 p-4 rounded-lg border border-stone-100">
+                                <p class="text-xs text-stone-400 font-bold uppercase tracking-wider mb-1">Ordering</p>
+                                <p id="c-order" class="font-semibold text-stone-800 text-lg"></p>
+                            </div>
+                            <div class="bg-stone-50 p-4 rounded-lg border border-stone-100">
+                                <p class="text-xs text-stone-400 font-bold uppercase tracking-wider mb-1">Duplicates</p>
+                                <p id="c-dupes" class="font-semibold text-stone-800 text-lg"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex-1 flex flex-col">
+                        <p class="text-sm text-stone-500 font-bold uppercase tracking-wider mb-2">Code Example & Expected Output</p>
+                        <pre id="c-code" class="flex-1 text-sm shadow-inner"></pre>
+                    </div>
+                </div>
+                <div class="mt-6 p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg">
+                    <p class="text-sm font-bold text-amber-800 uppercase tracking-wide mb-1">Exam Gotcha</p>
+                    <p id="c-gotcha" class="text-stone-700"></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-matrix" class="hidden animate-fade-in">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-2">Comprehensive Feature Matrix</h2>
+                <p class="text-stone-600 text-lg leading-relaxed max-w-3xl">
+                    This section provides a complete, side-by-side comparison of all structural features. Use this matrix to identify differences in adding elements, memory handling, and indexing capabilities across Lists, Strings, Tuples, Sets, and Dictionaries. This panoramic view is highly effective for memorizing comparative rules.
+                </p>
+            </header>
+
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-stone-100 text-stone-600 text-sm uppercase tracking-wider border-b border-stone-200">
+                            <th class="p-4 font-semibold">Feature</th>
+                            <th class="p-4 font-semibold text-teal-800">List</th>
+                            <th class="p-4 font-semibold text-teal-800">Tuple</th>
+                            <th class="p-4 font-semibold text-teal-800">Set</th>
+                            <th class="p-4 font-semibold text-teal-800">Dictionary</th>
+                            <th class="p-4 font-semibold text-teal-800">String</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm text-stone-700 divide-y divide-stone-100">
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4 font-bold text-stone-800">Syntax</td>
+                            <td class="p-4 font-mono text-teal-600">[]</td>
+                            <td class="p-4 font-mono text-teal-600">()</td>
+                            <td class="p-4 font-mono text-teal-600">{}</td>
+                            <td class="p-4 font-mono text-teal-600">{k: v}</td>
+                            <td class="p-4 font-mono text-teal-600">""</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4 font-bold text-stone-800">Mutable</td>
+                            <td class="p-4">✅ Yes (In-place)</td>
+                            <td class="p-4 text-rose-600">❌ No</td>
+                            <td class="p-4">✅ Yes</td>
+                            <td class="p-4">✅ Yes</td>
+                            <td class="p-4 text-rose-600">❌ No</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4 font-bold text-stone-800">Ordered</td>
+                            <td class="p-4">✅ Yes</td>
+                            <td class="p-4">✅ Yes</td>
+                            <td class="p-4 text-rose-600">❌ No</td>
+                            <td class="p-4">✅ Yes (3.7+)</td>
+                            <td class="p-4">✅ Yes</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4 font-bold text-stone-800">Indexing</td>
+                            <td class="p-4">✅ 0-based</td>
+                            <td class="p-4">✅ 0-based</td>
+                            <td class="p-4 text-rose-600">❌ None</td>
+                            <td class="p-4">✅ By Key</td>
+                            <td class="p-4">✅ 0-based</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4 font-bold text-stone-800">Add Element</td>
+                            <td class="p-4 font-mono text-xs bg-stone-100 rounded px-1">.append(x)<br>.insert(i,x)</td>
+                            <td class="p-4 text-rose-600">Cannot modify</td>
+                            <td class="p-4 font-mono text-xs bg-stone-100 rounded px-1">.add(x)</td>
+                            <td class="p-4 font-mono text-xs bg-stone-100 rounded px-1">dict[k] = v</td>
+                            <td class="p-4 text-rose-600">Requires recreation</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4 font-bold text-stone-800">Remove Element</td>
+                            <td class="p-4 font-mono text-xs bg-stone-100 rounded px-1">.remove(x)<br>.pop(i)</td>
+                            <td class="p-4 text-rose-600">Cannot modify</td>
+                            <td class="p-4 font-mono text-xs bg-stone-100 rounded px-1">.remove(x)<br>.discard(x)</td>
+                            <td class="p-4 font-mono text-xs bg-stone-100 rounded px-1">.pop(k)<br>del dict[k]</td>
+                            <td class="p-4 text-rose-600">Requires recreation</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4 font-bold text-stone-800">Duplicate Data</td>
+                            <td class="p-4">Allowed</td>
+                            <td class="p-4">Allowed</td>
+                            <td class="p-4 font-bold text-amber-600">Strictly Unique</td>
+                            <td class="p-4 font-bold text-amber-600">Keys Unique<br><span class="text-stone-500 font-normal">Values Allowed</span></td>
+                            <td class="p-4">Allowed</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="sec-performance" class="hidden animate-fade-in">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-2">Analytics & Performance</h2>
+                <p class="text-stone-600 text-lg leading-relaxed max-w-3xl">
+                    Understanding the underlying computational complexity is critical for advanced programming. This interactive chart visualizes the stark difference in operational time required for specific tasks, demonstrating why choosing the correct structure (like a Set over a List for membership testing) drastically affects software performance.
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="text-xl font-bold text-stone-800 mb-4 flex items-center gap-2">
+                        <span>⏱️</span> Time Complexity: Membership Test
+                    </h3>
+                    <p class="text-stone-600 mb-6 text-sm">
+                        Checking if an item exists (`item in structure`) behaves entirely differently based on the data type. Play with the toggle below to see how list arrays compare to hash tables as the dataset grows.
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                    <div class="mt-6 flex justify-center gap-4">
+                        <button onclick="updateChartData('small')" class="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-semibold rounded-lg transition-colors border border-stone-300">100 Items</button>
+                        <button onclick="updateChartData('large')" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm">1,000,000 Items</button>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="bg-teal-50 border border-teal-200 p-5 rounded-xl">
+                        <h4 class="font-bold text-teal-900 text-lg mb-2">The Hash Table Advantage</h4>
+                        <p class="text-teal-800 text-sm leading-relaxed">
+                            <strong>Sets and Dictionaries</strong> utilize hashing mechanisms. This means Python computes a numeric hash for the data, instantly directing it to a specific memory bucket. Therefore, looking up data takes exactly the same amount of time ($O(1)$) whether there are 10 items or 10 billion.
+                        </p>
+                    </div>
+                    <div class="bg-rose-50 border border-rose-200 p-5 rounded-xl">
+                        <h4 class="font-bold text-rose-900 text-lg mb-2">The Linear Scan Tax</h4>
+                        <p class="text-rose-800 text-sm leading-relaxed">
+                            <strong>Lists and Tuples</strong> are sequential arrays. If you search for an item, Python must start at index 0 and inspect every single item one by one until it finds a match. This is Linear Time ($O(N)$), meaning time scales directly with the amount of data.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-comprehensions" class="hidden animate-fade-in">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-2">Comprehensions & Evaluation Paradigms</h2>
+                <p class="text-stone-600 text-lg leading-relaxed max-w-3xl">
+                    Comprehensions flatten verbose loops into elegant single lines. In this section, explore how identical syntax logic produces entirely different memory behaviors (Eager vs. Lazy evaluation) simply by changing the enclosing brackets.
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">High Memory</div>
+                    <h3 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span class="text-rose-500">[]</span> List Comprehension
+                    </h3>
+                    <p class="text-sm font-semibold text-stone-500 uppercase tracking-widest mb-4">Eager Evaluation</p>
+                    <div class="bg-stone-900 p-4 rounded-lg mb-4">
+                        <code class="text-teal-400 font-mono text-sm">squares = [x**2 for x in range(3)]<br>print(squares)</code>
+                    </div>
+                    <div class="bg-stone-100 p-3 rounded border border-stone-200 mb-4 font-mono text-sm text-stone-700">
+                        Output: [0, 1, 4]
+                    </div>
+                    <p class="text-stone-600 text-sm leading-relaxed">
+                        Evaluates all items <strong>instantly</strong>. The CPU crunches every iteration upfront and stores the fully populated array structure directly into active RAM. Highly readable, but crashes systems if the dataset approaches gigabytes.
+                    </p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-teal-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">Low Memory</div>
+                    <h3 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span class="text-teal-500">()</span> Generator Comprehension
+                    </h3>
+                    <p class="text-sm font-semibold text-stone-500 uppercase tracking-widest mb-4">Lazy Evaluation</p>
+                    <div class="bg-stone-900 p-4 rounded-lg mb-4">
+                        <code class="text-teal-400 font-mono text-sm">gen = (x**2 for x in range(3))<br>print(next(gen))</code>
+                    </div>
+                    <div class="bg-stone-100 p-3 rounded border border-stone-200 mb-4 font-mono text-sm text-stone-700">
+                        Output: 0
+                    </div>
+                    <p class="text-stone-600 text-sm leading-relaxed">
+                        Evaluates items <strong>on-demand</strong>. Creates an iterator object that pauses execution. Data is generated strictly when `next()` is called. Maintains a nearly zero memory footprint, making it perfect for streaming massive files.
+                    </p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
+                    <h3 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span class="text-amber-500">{}</span> Set Comprehension
+                    </h3>
+                    <div class="bg-stone-900 p-4 rounded-lg mt-4 mb-4">
+                        <code class="text-amber-400 font-mono text-sm">uniques = {x.lower() for x in ["A", "a", "B"]}<br>print(uniques)</code>
+                    </div>
+                    <p class="text-stone-600 text-sm leading-relaxed">
+                        Identical internal logic to lists, but enforces the strict mathematical Set rules dynamically. As it eagerness processes the data, it instantly filters out any duplicates generated by the expression.
+                    </p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
+                    <h3 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span class="text-indigo-500">{k:v}</span> Dict Comprehension
+                    </h3>
+                    <div class="bg-stone-900 p-4 rounded-lg mt-4 mb-4">
+                        <code class="text-indigo-400 font-mono text-sm">squares = {x: x**2 for x in range(3)}<br>print(squares)</code>
+                    </div>
+                    <p class="text-stone-600 text-sm leading-relaxed">
+                        Constructs key-value mappings dynamically. The expression is split by a colon. Excellent for swapping keys and values, or generating relationship mappings from arrays.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-methods" class="hidden animate-fade-in">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-2">Methods & Built-in Functions</h2>
+                <p class="text-stone-600 text-lg leading-relaxed max-w-3xl">
+                    A comprehensive cheat sheet of the most heavily tested built-in functions and type-specific methods. This covers array mutations, string string processing, set mathematics, and dictionary key-value traversals.
+                </p>
+            </header>
+
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-stone-100 text-stone-600 text-sm uppercase tracking-wider border-b border-stone-200">
+                            <th class="p-4 font-semibold w-24">Type</th>
+                            <th class="p-4 font-semibold w-48">Method / Function</th>
+                            <th class="p-4 font-semibold">Description</th>
+                            <th class="p-4 font-semibold w-56">Syntax Example</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm text-stone-700 divide-y divide-stone-100">
+                        
+                        <!-- List Methods -->
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">List</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">.append(item)</td>
+                            <td class="p-4">Adds a single item to the very end of the list.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">l.append(5)</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">List</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">.extend(iterable)</td>
+                            <td class="p-4">Unpacks an iterable and adds all its items to the end.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">l.extend([6, 7])</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">List</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">.insert(index, item)</td>
+                            <td class="p-4">Inserts an item at a specific index position, shifting others.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">l.insert(0, "start")</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">List</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">.remove(item)</td>
+                            <td class="p-4">Removes the <em>first</em> occurrence of the specified item.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">l.remove("apple")</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">List</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">.pop([index])</td>
+                            <td class="p-4">Removes and returns the item at the index (defaults to the last).</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">val = l.pop(1)</td>
+                        </tr>
+
+                        <!-- String Methods -->
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-pink-100 text-pink-800 text-xs font-bold px-2 py-1 rounded">String</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">.upper() / .lower()</td>
+                            <td class="p-4">Returns a new string converted entirely to uppercase or lowercase.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">"Hi".upper()</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-pink-100 text-pink-800 text-xs font-bold px-2 py-1 rounded">String</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">.strip()</td>
+                            <td class="p-4">Removes leading and trailing whitespace from the string.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">" hi ".strip()</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-pink-100 text-pink-800 text-xs font-bold px-2 py-1 rounded">String</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">.split(separator)</td>
+                            <td class="p-4">Splits a string into a list based on a provided separator.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">"a,b".split(",")</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-pink-100 text-pink-800 text-xs font-bold px-2 py-1 rounded">String</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">.join(iterable)</td>
+                            <td class="p-4">Joins elements of an iterable using the string as a separator.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">"-".join(["a", "b"])</td>
+                        </tr>
+
+                        <!-- Set Methods -->
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded">Set</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">.add(item)</td>
+                            <td class="p-4">Adds a single element to the set uniquely.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">s.add(10)</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded">Set</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">.discard(item)</td>
+                            <td class="p-4">Removes element. <strong>Safely ignores</strong> the command if item is missing.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">s.discard(99)</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded">Set</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">.remove(item)</td>
+                            <td class="p-4">Removes element. <strong>Raises KeyError</strong> if item is missing.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">s.remove(10)</td>
+                        </tr>
+
+                        <!-- Tuple Methods -->
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded">Tuple</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">.count(item)</td>
+                            <td class="p-4">Returns the number of times an item appears in the tuple.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">t.count(5)</td>
+                        </tr>
+
+                        <!-- Dictionary Methods -->
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-orange-100 text-orange-800 text-xs font-bold px-2 py-1 rounded">Dict</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">.keys() / .values()</td>
+                            <td class="p-4">Returns a view object of all keys or all values in the dict.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">d.keys()</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-orange-100 text-orange-800 text-xs font-bold px-2 py-1 rounded">Dict</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">.items()</td>
+                            <td class="p-4">Returns a view object of all <code class="bg-stone-100 px-1 rounded">(key, value)</code> tuple pairs.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">d.items()</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-orange-100 text-orange-800 text-xs font-bold px-2 py-1 rounded">Dict</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">.get(key, default)</td>
+                            <td class="p-4">Safely retrieves value for a key; returns default if missing.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">d.get("age", 0)</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-orange-100 text-orange-800 text-xs font-bold px-2 py-1 rounded">Dict</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">.pop(key)</td>
+                            <td class="p-4">Removes the specified key and returns its value.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">val = d.pop("id")</td>
+                        </tr>
+
+                        <!-- Built-in Functions -->
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-stone-200 text-stone-800 text-xs font-bold px-2 py-1 rounded">Built-In</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">len(iterable)</td>
+                            <td class="p-4">Returns the total number of items in the collection.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">len([1, 2, 3])</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50 transition-colors">
+                            <td class="p-4"><span class="bg-stone-200 text-stone-800 text-xs font-bold px-2 py-1 rounded">Built-In</span></td>
+                            <td class="p-4 font-mono font-bold text-stone-800">sorted(iterable)</td>
+                            <td class="p-4">Returns a brand new sorted <em>list</em> from the iterable elements.</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs bg-stone-50 rounded">sorted({"c":3, "a":1})</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const conceptsData = {
+            'list': {
+                icon: '📦', title: 'List',
+                desc: 'A dynamic, ordered sequence. It maintains insertion order and automatically resizes in memory as items are added or removed. Ideal for general-purpose sequential groupings.',
+                syntax: 'my_list = [1, 2, "a"]', mutable: '✅ Yes', order: '✅ Ordered', dupes: '✅ Allowed',
+                gotcha: 'List modifications (like .append) occur IN-PLACE. They return None, not a new list.',
+                code: 'items = [10, 20]\nitems.append(30)\nitems.extend([40, 50])\npopped = items.pop(1)\nprint(items, "popped:", popped)\n\n<span class="text-stone-400"># Output:</span>\n<span class="code-highlight">[10, 30, 40, 50] popped: 20</span>'
+            },
+            'string': {
+                icon: '🔤', title: 'String',
+                desc: 'An ordered sequence of Unicode characters. Highly optimized for text processing and formatting.',
+                syntax: 's = "Hello"', mutable: '❌ No', order: '✅ Ordered', dupes: '✅ Allowed',
+                gotcha: 'Strings are fully IMMUTABLE. Any string method like .upper() or .replace() does not change the original, it creates a completely new memory object.',
+                code: 's = "hello"\n# s[0] = "H" <- Throws TypeError!\nnew_s = s.replace("h", "y")\nprint(new_s)\n\n<span class="text-stone-400"># Output:</span>\n<span class="code-highlight">yello</span>'
+            },
+            'tuple': {
+                icon: '🔒', title: 'Tuple',
+                desc: 'A fixed, ordered sequence. Once created, its structure is permanently locked in memory. Guarantees data integrity and is hashable if containing immutable elements.',
+                syntax: 't = (1, 2, 3)', mutable: '❌ No', order: '✅ Ordered', dupes: '✅ Allowed',
+                gotcha: 'Creating a tuple with a single element requires a trailing comma (e.g., t = (5,) ). Without it, Python treats the parentheses as a standard math grouping.',
+                code: 'real_tuple = (5,)\nfake_tuple = (5)\nprint(type(real_tuple), type(fake_tuple))\n\n<span class="text-stone-400"># Output:</span>\n<span class="code-highlight">&lt;class \'tuple\'&gt; &lt;class \'int\'&gt;</span>'
+            },
+            'set': {
+                icon: '🏷️', title: 'Set',
+                desc: 'An unordered collection of strictly unique elements backed by a hash table. Optimized for lightning-fast membership testing and mathematical operations.',
+                syntax: 's = {1, 2} | set()', mutable: '✅ Yes', order: '❌ Unordered', dupes: '❌ Strictly Unique',
+                gotcha: 'You cannot use {} to make an empty set (that creates a Dictionary). You MUST use set(). Also, sets cannot contain mutable structures like lists inside them.',
+                code: 'my_set = {10, 20, 30, 20}\nmy_set.discard(99) # Safe removal\nmy_set.add((1, 2)) # Tuples inside are ok\nprint(my_set)\n\n<span class="text-stone-400"># Output:</span>\n<span class="code-highlight">{10, 20, 30, (1, 2)}</span>'
+            },
+            'dict': {
+                icon: '🔑', title: 'Dictionary',
+                desc: 'A collection of key-value pairs. Uses hashing for near-instant data retrieval based on unique keys.',
+                syntax: 'd = {"k": "v"}', mutable: '✅ Yes', order: '✅ Ordered (3.7+)', dupes: '❌ Keys Unique',
+                gotcha: 'Keys MUST be strictly immutable (strings, integers, tuples). Accessing a missing key via dict["k"] causes a crash; use dict.get("k", default) instead.',
+                code: 'd = {"name": "Alice"}\nd["age"] = 22 # Add new pair\nval = d.pop("name") # Remove & get\nprint(d, "yielded", val)\nprint(d.get("missing", "Not Found"))\n\n<span class="text-stone-400"># Output:</span>\n<span class="code-highlight">{\'age\': 22} yielded Alice\nNot Found</span>'
+            }
+        };
+
+        let performanceChartInstance = null;
+
+        function navigate(sectionId) {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active-nav');
+                btn.classList.add('text-stone-600', 'hover:bg-stone-200');
+            });
+            const activeBtn = document.getElementById('btn-' + sectionId);
+            activeBtn.classList.remove('text-stone-600', 'hover:bg-stone-200');
+            activeBtn.classList.add('active-nav');
+
+            document.querySelectorAll('main > section').forEach(sec => {
+                sec.classList.add('hidden');
+            });
+            document.getElementById('sec-' + sectionId).classList.remove('hidden');
+
+            if(sectionId === 'concepts' && document.getElementById('concept-display').classList.contains('hidden')){
+                loadConcept('list');
+            }
+            if(sectionId === 'performance') {
+                initChart();
+            }
+        }
+
+        function loadConcept(key) {
+            const data = conceptsData[key];
+            document.getElementById('c-icon').innerText = data.icon;
+            document.getElementById('c-title').innerText = data.title;
+            document.getElementById('c-desc').innerText = data.desc;
+            document.getElementById('c-syntax').innerText = data.syntax;
+            document.getElementById('c-mutable').innerText = data.mutable;
+            document.getElementById('c-order').innerText = data.order;
+            document.getElementById('c-dupes').innerText = data.dupes;
+            document.getElementById('c-code').innerHTML = data.code;
+            document.getElementById('c-gotcha').innerText = data.gotcha;
+            
+            const display = document.getElementById('concept-display');
+            display.classList.remove('hidden');
+            display.classList.remove('animate-fade-in');
+            void display.offsetWidth;
+            display.classList.add('animate-fade-in');
+        }
+
+        function initChart() {
+            if (performanceChartInstance) return;
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            performanceChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['List (O(N) Linear)', 'Set (O(1) Hashing)'],
+                    datasets: [{
+                        label: 'Relative Lookup Time Units',
+                        data: [100, 1],
+                        backgroundColor: ['rgba(244, 63, 94, 0.7)', 'rgba(13, 148, 136, 0.7)'],
+                        borderColor: ['rgb(225, 29, 72)', 'rgb(15, 118, 110)'],
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.raw + " Time Units";
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Computation Time', color: '#57534e' },
+                            grid: { color: '#e7e5e4' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChartData(size) {
+            if (!performanceChartInstance) return;
+            if (size === 'small') {
+                performanceChartInstance.data.datasets[0].data = [100, 1];
+                performanceChartInstance.options.scales.y.title.text = "Computation Time (100 Items)";
+            } else {
+                performanceChartInstance.data.datasets[0].data = [1000000, 1];
+                performanceChartInstance.options.scales.y.title.text = "Computation Time (1M Items)";
+            }
+            performanceChartInstance.update();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadConcept('list');
+        });
+    </script>
+    <style>
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</body>
+</html>
